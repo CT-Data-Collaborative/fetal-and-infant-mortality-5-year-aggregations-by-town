@@ -9,8 +9,8 @@ import pytest
 ##################################################################
 
 
-def test_towns(towns, geographies):
-    assert set([x['Town'] for x in towns]) == set(geographies)
+# def test_towns(towns, geographies):
+#     assert set([x['Town'] for x in towns]) == set(geographies)
 
 
 def test_dataset_row_counts(rowcount):
