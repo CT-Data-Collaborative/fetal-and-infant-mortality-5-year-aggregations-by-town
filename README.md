@@ -4,7 +4,7 @@ Fetal and Infant Mortality - 5-Year Aggregations by Town
 
 Fetal and Infant Mortality - 5-Year Aggregations by Town reports the number and rate of fetal, neonatal, natal, and infant deaths.
 
-Data Source: Connecticut Department of Public Health - Data Transfer via Email
+Data Source: Connecticut Department of Public Health - Data Transfer
 
 ## License MIT
 
