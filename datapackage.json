@@ -115,6 +115,16 @@
       "value": "",
       "type": "string"
     },
+    "numerator": {
+      "ckan_name": "Numerator",
+      "value": "Number of deaths for given set of indicators.",
+      "type": "string"
+    },    
+    "denominator": {
+      "ckan_name": "Denominator",
+      "value": "1000 Live Births",
+      "type": "string"
+    },       
     "domain": {
       "ckan_name": "Domain",
       "value": "Health",
