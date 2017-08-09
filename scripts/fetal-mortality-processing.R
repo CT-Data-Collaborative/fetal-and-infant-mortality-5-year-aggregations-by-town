@@ -222,11 +222,36 @@ fips <- unique(fips)
 names(final_fm)[names(final_fm) == "GEOG_name"] <- "Town/County"
 final_fm_fips <- merge(final_fm, fips, by = "Town/County", all.x=T)
 
-
-final_fm_fips_arrange <- final_fm_fips %>% 
+final_fm_fips<- final_fm_fips %>% 
   rename("Year" = "RR_YR", "Measure Type" = "Measure.Type") %>% 
-  select("AGGREGATION", "Town/County", "FIPS", "Year", "Race", "Type", "Measure Type", "Variable", "Value") %>% 
+  select("AGGREGATION", "Town/County", "FIPS", "Year", "Race", "Type", "Measure Type", "Variable", "Value") 
+
+final_fm_fips$Value <- round(final_fm_fips$Value, 1)
+
+#Find where there are duplicates in all but Value column (extraneous values, currently all "Unknown CT Town")
+ind <- final_fm_fips[which(duplicated(final_fm_fips[,1:8])),]
+
+#Isolate combos 
+ind <- select(ind, -c(Value, Variable))
+
+#Create join table
+dupes <- merge(final_fm_fips, ind, by = c("AGGREGATION", "Town/County", "FIPS", "Year", "Race", "Type", "Measure Type"), all.y=T)
+dupes <- unique(dupes)
+
+#Create anti_join table (remove rows where duplicates were)
+antijoin_table <- final_fm_fips %>% 
+  anti_join(dupes)
+
+#now remove rows where value=0
+dupes <- dupes[is.na(dupes$Value),]
+
+#combine with original df
+final_fm_fips_arrange <- rbind(antijoin_table, dupes)
+
+final_fm_fips_arrange <- final_fm_fips_arrange %>% 
   arrange(`AGGREGATION`, `Town/County`, Year, `Race`, `Type`, `Measure Type`)
+
+#town_1_yr <- final_fm_fips_arrange[final_fm_fips_arrange$AGGREGATION == "1-Year" & !(final_fm_fips_arrange$`Town/County` %in% counties),]
 
 write.table(
   final_fm_fips_arrange,
@@ -235,9 +260,13 @@ write.table(
   row.names = F
 )
 
-counties <- c("Connecticut", "Fairfield County", "Hartford County",
-              "Litchfield County", "Middlesex County", "New Haven County",
-              "New London County", "Tolland County", "Windham County")
+counties_with_CT <- c("Connecticut", "Fairfield County", "Hartford County",
+                      "Litchfield County", "Middlesex County", "New Haven County",
+                      "New London County", "Tolland County", "Windham County")
+
+counties_without_CT <- c("Fairfield County", "Hartford County",
+                         "Litchfield County", "Middlesex County", "New Haven County",
+                         "New London County", "Tolland County", "Windham County")
 
 # write tables by agg level
 for (y in c(1,3,5)) {
@@ -245,7 +274,7 @@ for (y in c(1,3,5)) {
   aggData <- final_fm_fips_arrange[final_fm_fips_arrange$AGGREGATION == agg,]
   
   # county data
-  county <- aggData[aggData$`Town/County` %in% counties,]
+  county <- aggData[aggData$`Town/County` %in% counties_with_CT,]
   names(county)[names(county) == "Town/County"] <- "County"
   county <- select(county, -(AGGREGATION))
   write.table(
@@ -257,7 +286,7 @@ for (y in c(1,3,5)) {
   )
   
   # town data
-  town <- aggData[!(aggData$`Town/County` %in% counties),]
+  town <- aggData[!(aggData$`Town/County` %in% counties_without_CT),]
   names(town)[names(town) == "Town/County"] <- "Town"
   town <- select(town, -(AGGREGATION))
   
